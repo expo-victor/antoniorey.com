@@ -67,6 +67,12 @@ async function resolveWritePath(): Promise<string> {
 	return ROOT_WRITE_PATH;
 }
 
+async function resolveWriteCandidates(): Promise<string[]> {
+	const primary = await resolveWritePath();
+	const candidates = [primary, ROOT_WRITE_PATH, DIST_WRITE_PATH];
+	return [...new Set(candidates)];
+}
+
 function resolveEventTimestamp(event: AgendaEvent): number | null {
 	const rawDate = (event.endDate?.trim() || event.date?.trim());
 	if (!rawDate) {
@@ -137,9 +143,22 @@ export async function readEvents(): Promise<AgendaEvent[]> {
 }
 
 export async function writeEvents(events: AgendaEvent[]): Promise<void> {
-	const targetPath = await resolveWritePath();
-	await mkdir(dirname(targetPath), { recursive: true });
-	await writeFile(targetPath, JSON.stringify(events, null, 2), "utf-8");
+	const payload = JSON.stringify(events, null, 2);
+	const writeCandidates = await resolveWriteCandidates();
+	const failures: string[] = [];
+
+	for (const targetPath of writeCandidates) {
+		try {
+			await mkdir(dirname(targetPath), { recursive: true });
+			await writeFile(targetPath, payload, "utf-8");
+			return;
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			failures.push(`${targetPath}: ${message}`);
+		}
+	}
+
+	throw new Error(`Unable to persist agenda data. ${failures.join(" | ")}`);
 }
 
 export async function getEventById(id: string): Promise<AgendaEvent | null> {

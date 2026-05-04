@@ -156,13 +156,21 @@ export const PUT: APIRoute = async ({ params, request }) => {
 		updated.gallery = current.gallery;
 	}
 
-	events[index] = updated;
-	await writeEvents(events);
+	try {
+		events[index] = updated;
+		await writeEvents(events);
 
-	return new Response(JSON.stringify(updated), {
-		status: 200,
-		headers: { "Content-Type": "application/json" },
-	});
+		return new Response(JSON.stringify(updated), {
+			status: 200,
+			headers: { "Content-Type": "application/json" },
+		});
+	} catch (error) {
+		const message = error instanceof Error ? error.message : "No se pudo actualizar el evento.";
+		return new Response(JSON.stringify({ error: message }), {
+			status: 500,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
 };
 
 export const DELETE: APIRoute = async ({ params, request }) => {
@@ -192,11 +200,19 @@ export const DELETE: APIRoute = async ({ params, request }) => {
 		});
 	}
 
-	await writeEvents(next);
+	try {
+		await writeEvents(next);
 
-	return new Response(null, {
-		status: 204,
-	});
+		return new Response(null, {
+			status: 204,
+		});
+	} catch (error) {
+		const message = error instanceof Error ? error.message : "No se pudo eliminar el evento.";
+		return new Response(JSON.stringify({ error: message }), {
+			status: 500,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
 };
 
 export const OPTIONS: APIRoute = async () =>

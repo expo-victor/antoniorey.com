@@ -99,29 +99,37 @@ export const POST: APIRoute = async ({ request }) => {
 		});
 	}
 
-const event: AgendaEvent = {
-	id,
-	title,
-	date,
-	endDate: endDate || undefined,
-	time: sanitizeString(payload.time) || undefined,
-	location: sanitizeString(payload.location) || undefined,
-	description: sanitizeString(payload.description) || undefined,
-	image: sanitizeString(payload.image) || undefined,
-};
+	try {
+		const event: AgendaEvent = {
+			id,
+			title,
+			date,
+			endDate: endDate || undefined,
+			time: sanitizeString(payload.time) || undefined,
+			location: sanitizeString(payload.location) || undefined,
+			description: sanitizeString(payload.description) || undefined,
+			image: sanitizeString(payload.image) || undefined,
+		};
 
-const gallery = sanitizeGallery(payload.gallery);
-if (gallery.length) {
-	event.gallery = gallery;
-}
+		const gallery = sanitizeGallery(payload.gallery);
+		if (gallery.length) {
+			event.gallery = gallery;
+		}
 
-	events.push(event);
-	await writeEvents(events);
+		events.push(event);
+		await writeEvents(events);
 
-	return new Response(JSON.stringify(event), {
-		status: 201,
-		headers: { "Content-Type": "application/json" },
-	});
+		return new Response(JSON.stringify(event), {
+			status: 201,
+			headers: { "Content-Type": "application/json" },
+		});
+	} catch (error) {
+		const message = error instanceof Error ? error.message : "No se pudo guardar el evento.";
+		return new Response(JSON.stringify({ error: message }), {
+			status: 500,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
 };
 
 export const OPTIONS: APIRoute = async () =>
