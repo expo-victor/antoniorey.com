@@ -8,6 +8,8 @@ type Operator = {
 	password: string;
 };
 
+export const AUTH_COOKIE_NAME = "antonio_rey_zulu_session";
+
 const operatorCandidates = [
 	// project root when running via `astro dev`
 	resolve(process.cwd(), "src/data/operator.json"),
@@ -61,21 +63,34 @@ export function computeToken(operator: Operator): string {
 	return Buffer.from(`${operator.username}:${operator.password}`).toString("base64");
 }
 
+function readCookie(request: Request, name: string): string {
+	const cookieHeader = request.headers.get("cookie") ?? "";
+	const cookies = cookieHeader.split(";");
+
+	for (const cookie of cookies) {
+		const [rawName, ...rawValueParts] = cookie.trim().split("=");
+		if (rawName === name) {
+			return decodeURIComponent(rawValueParts.join("="));
+		}
+	}
+
+	return "";
+}
+
 export async function authorize(request: Request): Promise<boolean> {
 	const operator = await getOperator();
 	if (!operator) {
 		return false;
 	}
 
+	const expectedToken = computeToken(operator);
 	const header = request.headers.get("authorization");
-	if (!header) {
-		return false;
+	if (header) {
+		const [, rawToken = ""] = header.match(/^Bearer\s+(.*)$/i) ?? [];
+		if (rawToken && rawToken === expectedToken) {
+			return true;
+		}
 	}
 
-	const [, rawToken = ""] = header.match(/^Bearer\s+(.*)$/i) ?? [];
-	if (!rawToken) {
-		return false;
-	}
-
-	return rawToken === computeToken(operator);
+	return readCookie(request, AUTH_COOKIE_NAME) === expectedToken;
 }

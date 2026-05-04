@@ -52,6 +52,11 @@
 				width: min(960px, 100%);
 				padding: clamp(2rem, 5vw, 3.5rem);
 				gap: 2rem;
+				box-shadow: none;
+			}
+
+			main[data-mode="dashboard"] #login-section {
+				display: none;
 			}
 
 			h1 {
@@ -83,10 +88,9 @@
 			flex-direction: column;
 			gap: 0.55rem;
 			padding: 0.9rem 1rem;
-			border-radius: 14px;
+			border-radius: 10px;
 			border: 1px solid rgba(30, 28, 26, 0.12);
-			background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(250, 249, 247, 0.9));
-			box-shadow: 0 12px 24px rgba(20, 18, 16, 0.05);
+			background: #fff;
 			transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 		}
 
@@ -208,12 +212,11 @@
 				border: 1px solid #f7d4a8;
 				color: #a05b07;
 			}
-			.message.warning2 {
-				background: rgba(251, 227, 231, 0.9);
-				border: 1px solid rgba(189, 36, 49, 0.35);
-				color: var(--accent-dark);
-				box-shadow: 0 16px 32px rgba(189, 36, 49, 0.12);
-			}
+		.message.warning2 {
+			background: rgba(251, 227, 231, 0.9);
+			border: 1px solid rgba(189, 36, 49, 0.35);
+			color: var(--accent-dark);
+		}
 
 			.event-toolbar {
 				display: flex;
@@ -235,12 +238,16 @@
 
 		.event-block {
 			border: 1px solid rgba(30, 28, 26, 0.08);
-			border-radius: 20px;
+			border-radius: 12px;
 			padding: 1.7rem 1.9rem;
 			display: grid;
 			gap: 1.4rem;
-			background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(250, 249, 247, 0.9));
-			box-shadow: 0 24px 42px rgba(20, 18, 16, 0.08);
+			background: #fff;
+		}
+
+		#event-form.event-block {
+			border-color: transparent;
+			background: transparent;
 		}
 
 		.event-block--existing {
@@ -408,15 +415,13 @@
 			<template id="dashboard-template">
 				<section class="section" data-dashboard hidden>
 					<div class="event-toolbar">
-						<span>Sesión iniciada. Gestiona la agenda en tiempo real.</span>
+						<span>Sesión iniciada</span>
 						<button class="secondary" id="logout-button" type="button">Cerrar sesión</button>
 					</div>
 					<div class="message warning" role="note">
 						Los eventos cuya fecha ya pasó se eliminan automáticamente al cargar la agenda.
 					</div>
-					<div class="message warning2" role="note">
-						Es normal que al guardar o modificar un evento, el sistema te pida re-introducir las credenciales. Sé que es un poco tedioso. Asegúrate de guardar cambios individuales en cada evento y no tratar de guardar varios a la vez.
-					</div>
+					
 					<form id="event-form" class="event-block">
 						<div class="message info event-block-note">
 							Completa los campos para añadir un nuevo evento a la agenda.
@@ -479,6 +484,7 @@
 			let logoutButton = null;
 
 			const setStatus = (message, variant = "info") => {
+				if (!statusBox) return;
 				statusBox.textContent = message;
 				statusBox.className = `message ${variant}`;
 			};
@@ -574,7 +580,9 @@
 
 			const handleEventFormSubmit = (event) => {
 				event.preventDefault();
-				const formData = new FormData(event.currentTarget);
+				const form = event.currentTarget;
+				if (!(form instanceof HTMLFormElement)) return;
+				const formData = new FormData(form);
 				const image = formData.get("image")?.toString().trim();
 				const galleryInput = parseGalleryInput(formData.get("gallery")?.toString() ?? "");
 
@@ -593,8 +601,10 @@
 					return;
 				}
 
-				createEvent(payload).then(() => {
-					event.currentTarget.reset();
+				createEvent(payload).then((created) => {
+					if (created) {
+						form.reset();
+					}
 				});
 			};
 
@@ -637,7 +647,7 @@
 			};
 
 			const handleLogoutClick = () => {
-				forceLogout("Sesión cerrada. Puedes iniciar sesión de nuevo cuando quieras.", "success", {
+				logout("Sesión cerrada.", "success", {
 					resetForm: true,
 				});
 			};
@@ -732,6 +742,7 @@
 				try {
 					const response = await fetch("/api/login", {
 						method: "POST",
+						credentials: "same-origin",
 						headers: { "Content-Type": "application/json" },
 						body: JSON.stringify(credentials),
 					});
@@ -741,7 +752,7 @@
 						throw new Error(payload?.error || "Acceso denegado.");
 					}
 
-					setAuthToken(payload.token);
+					setAuthToken("");
 					toggleView(true, {
 						message: `Acceso concedido${payload?.username ? ` (${payload.username})` : ""}. Cargando agenda…`,
 						variant: "success",
@@ -761,11 +772,12 @@
 				try {
 					const response = await fetch("/api/agenda", {
 						method: "POST",
+						credentials: "same-origin",
 						headers: requestHeaders(),
 						body: JSON.stringify(data),
 					});
 					if (response.status === 401) {
-						forceLogout();
+						logout();
 						return;
 					}
 					const payload = await response.json();
@@ -777,8 +789,10 @@
 					events.sort((a, b) => a.date.localeCompare(b.date));
 					renderEvents();
 					setStatus("Evento creado correctamente.", "success");
+					return true;
 				} catch (error) {
 					setStatus(error.message || "No se pudo crear el evento.", "error");
+					return false;
 				}
 			};
 
@@ -786,11 +800,12 @@
 				try {
 					const response = await fetch(`/api/agenda/${encodeURIComponent(id)}`, {
 						method: "PUT",
+						credentials: "same-origin",
 						headers: requestHeaders(),
 						body: JSON.stringify(data),
 					});
 					if (response.status === 401) {
-						forceLogout();
+						logout();
 						return;
 					}
 					const payload = await response.json();
@@ -814,10 +829,11 @@
 				try {
 					const response = await fetch(`/api/agenda/${encodeURIComponent(id)}`, {
 						method: "DELETE",
+						credentials: "same-origin",
 						headers: requestHeaders(),
 					});
 					if (response.status === 401) {
-						forceLogout();
+						logout();
 						return;
 					}
 					if (!response.ok && response.status !== 204) {
@@ -842,6 +858,19 @@
 			setAuthToken("");
 			events = [];
 			toggleView(false, { message, variant, ...options });
+		};
+
+		const logout = async (message = "Sesión cerrada. Puedes iniciar sesión de nuevo cuando quieras.", variant = "success", options = {}) => {
+			try {
+				await fetch("/api/login", {
+					method: "DELETE",
+					credentials: "same-origin",
+				});
+			} catch {
+				// Ignore network issues and clear the local view regardless.
+			}
+
+			forceLogout(message, variant, options);
 		};
 
 		const formatDateLabel = (value) => {
@@ -892,6 +921,25 @@
 			});
 
 			toggleView(false, { resetForm: false });
+
+			fetch("/api/login", {
+				credentials: "same-origin",
+			})
+				.then(async (response) => {
+					if (!response.ok) return null;
+					return response.json();
+				})
+				.then((payload) => {
+					if (!payload?.authenticated) return;
+					toggleView(true, {
+						message: `Sesión restaurada${payload.username ? ` (${payload.username})` : ""}. Cargando agenda…`,
+						variant: "success",
+					});
+					return loadEvents();
+				})
+				.catch(() => {
+					// Ignore initial restore errors and keep the login form visible.
+				});
 		</script>
 	</body>
 </html>

@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { resolve, dirname, basename } from "node:path";
 import agendaFallback from "../data/agenda.json";
 
 export type AgendaEvent = {
@@ -14,16 +14,17 @@ export type AgendaEvent = {
 	gallery?: string[];
 };
 
+const ROOT_WRITE_PATH = resolve(process.cwd(), "data/agenda.json");
+const DIST_WRITE_PATH = resolve(process.cwd(), "../data/agenda.json");
+
 const agendaCandidates = [
-	resolve(process.cwd(), "data/agenda.json"),
+	ROOT_WRITE_PATH,
+	DIST_WRITE_PATH,
 	resolve(process.cwd(), "src/data/agenda.json"),
-	resolve(process.cwd(), "../data/agenda.json"),
 	resolve(process.cwd(), "../src/data/agenda.json"),
 ];
 
 const fallbackEvents = Array.isArray(agendaFallback) ? agendaFallback : [];
-
-const DEFAULT_WRITE_PATH = agendaCandidates[0];
 
 type AgendaLoadResult = {
 	events: AgendaEvent[];
@@ -58,8 +59,11 @@ async function locateExistingPath(): Promise<string | null> {
 }
 
 async function resolveWritePath(): Promise<string> {
-	const existing = await locateExistingPath();
-	return existing ?? DEFAULT_WRITE_PATH;
+	if (basename(process.cwd()) === "dist" && existsSync(dirname(DIST_WRITE_PATH))) {
+		return DIST_WRITE_PATH;
+	}
+
+	return ROOT_WRITE_PATH;
 }
 
 function resolveEventTimestamp(event: AgendaEvent): number | null {
