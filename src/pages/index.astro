@@ -300,17 +300,10 @@ const platformIconSrc: Record<string, string> = {
 
 const promoterContacts = [
 	{
-		label: "Promotor España",
-		name: "Antonio Montoya",
-		contacts: [
-			{ value: "+34 616 350 514", href: "tel:+34616350514" },
-		],
-	},
-	{
 		label: "Promotor México",
 		name: "Ricardo Marcos",
 		contacts: [
-			{ value: "Marcos@art-x2.com", href: "mailto:Marcos@art-x2.com" },
+			{ value: "rmarcos@art-x2.com", href: "mailto:rmarcos@art-x2.com" },
 		],
 	},
 	{
@@ -547,7 +540,7 @@ const promoterContacts = [
 				align-items: center;
 				gap: 0.6rem;
 				font-size: 0.85rem;
-				letter-spacing: 0.14em;
+				letter-spacing: 0.05em;
 				text-transform: uppercase;
 				color: var(--accent);
 			}
@@ -1318,10 +1311,10 @@ const promoterContacts = [
 
 		.contact-panel {
 			margin-top: 2rem;
-			padding: clamp(1.4rem, 3.8vw, 2.2rem);
-			border: 1px solid var(--border);
-			border-radius: 20px;
-			background: linear-gradient(145deg, rgba(180, 31, 44, 0.04), rgba(255, 255, 255, 0.9));
+			padding: 0;
+			border: 0;
+			border-radius: 0;
+			background: transparent;
 		}
 
 			.promoter-list {
@@ -1335,18 +1328,19 @@ const promoterContacts = [
 
 			.promoter-item {
 				padding: 1rem 1.2rem;
-				border-radius: 16px;
+				border-radius: 10px;
 				border: 1px solid rgba(20, 19, 18, 0.12);
 				background: rgba(255, 255, 255, 0.86);
-				box-shadow: 0 8px 18px rgba(20, 19, 18, 0.08);
 				display: grid;
 				gap: 0.35rem;
 				text-align: left;
 			}
 
 			.promoter-label {
+				font-family: var(--font-serif);
 				font-size: 0.74rem;
-				letter-spacing: 0.16em;
+				line-height: 1.45;
+				letter-spacing: 0.08em;
 				text-transform: uppercase;
 				color: rgba(20, 19, 18, 0.62);
 				font-weight: 600;
@@ -1773,7 +1767,7 @@ const promoterContacts = [
 							</div>
 						) : (
 							<div class="agenda-empty">
-								<p>No hay fechas públicas confirmadas por ahora. Escríbenos para recibir información personalizada.</p>
+								<p>No hay fechas confirmadas ahora mismo</p>
 							</div>
 						)}
 					</div>
@@ -2042,7 +2036,7 @@ const promoterContacts = [
 					<div class="container">
 						<div class="section-header">
 							<h2 id="contacto-heading">Promotores oficiales</h2>
-							<p>Contacta directamente con la persona promotora asignada a tu territorio. (Haz clic sobre los emails para abrir la app directamente).</p>
+							<p>Contacta directamente con la persona promotora asignada a tu territorio.
 						</div>
 						<div class="contact-panel">
 							<ul class="promoter-list">
