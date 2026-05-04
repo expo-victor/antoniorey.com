@@ -26,22 +26,56 @@ function parseEventDate(input: string | undefined, time?: string | undefined) {
 	return new Date(year, month - 1, day, hour || 0, minute || 0);
 }
 
-const eventDate = event ? parseEventDate(event.date, event.time) : null;
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-const isPast = eventDate ? eventDate.getTime() < today.getTime() : false;
+function parseEventRangeEnd(startDate: string | undefined, endDate?: string | undefined) {
+	const rawValue = endDate?.trim() || startDate?.trim();
+	if (!rawValue) return null;
+	const [year, month, day] = rawValue.split("-").map(Number);
+	if (!year || !month || !day) return null;
+	return new Date(year, month - 1, day, 23, 59, 59);
+}
 
-const heroImage = event?.image || fallbackImage;
-const gallery = event?.gallery?.length ? event.gallery : [heroImage];
-
-const longDate = eventDate
-	? eventDate.toLocaleDateString("es-ES", {
+function formatDateRange(startDate: Date | null, endDate: Date | null) {
+	if (!startDate) return event?.date ?? "";
+	if (!endDate || startDate.toDateString() === endDate.toDateString()) {
+		return startDate.toLocaleDateString("es-ES", {
 			weekday: "long",
 			day: "numeric",
 			month: "long",
 			year: "numeric",
-	  })
-	: event?.date ?? "";
+		});
+	}
+
+	const sameMonth =
+		startDate.getFullYear() === endDate.getFullYear() && startDate.getMonth() === endDate.getMonth();
+
+	if (sameMonth) {
+		return `${startDate.getDate()}-${endDate.getDate()} de ${endDate.toLocaleDateString("es-ES", {
+			month: "long",
+			year: "numeric",
+		})}`;
+	}
+
+	return `${startDate.toLocaleDateString("es-ES", {
+		day: "numeric",
+		month: "long",
+		year: "numeric",
+	})} - ${endDate.toLocaleDateString("es-ES", {
+		day: "numeric",
+		month: "long",
+		year: "numeric",
+	})}`;
+}
+
+const eventDate = event ? parseEventDate(event.date, event.time) : null;
+const eventEndDate = event ? parseEventRangeEnd(event.date, event.endDate) : null;
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const isPast = eventEndDate ? eventEndDate.getTime() < today.getTime() : false;
+
+const heroImage = event?.image || fallbackImage;
+const gallery = event?.gallery?.length ? event.gallery : [heroImage];
+
+const longDate = formatDateRange(eventDate, eventEndDate);
 
 const simpleTime = eventDate && event?.time
 	? eventDate.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })

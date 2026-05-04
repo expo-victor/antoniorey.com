@@ -432,8 +432,12 @@
 								<input name="title" type="text" required />
 							</label>
 							<label class="field-group">
-								<span class="field-label">Fecha *</span>
+								<span class="field-label">Fecha de inicio</span>
 								<input name="date" type="date" required />
+							</label>
+							<label class="field-group">
+								<span class="field-label">Fecha fin</span>
+								<input name="endDate" type="date" />
 							</label>
 							<label class="field-group">
 								<span class="field-label">Hora</span>
@@ -589,6 +593,7 @@
 				const payload = {
 					title: formData.get("title")?.toString().trim(),
 					date: formData.get("date")?.toString().trim(),
+					endDate: formData.get("endDate")?.toString().trim() || undefined,
 					time: formData.get("time")?.toString().trim(),
 					location: formData.get("location")?.toString().trim(),
 					description: formData.get("description")?.toString().trim(),
@@ -598,6 +603,11 @@
 
 				if (!payload.title || !payload.date) {
 					setStatus("Título y fecha son obligatorios.", "error");
+					return;
+				}
+
+				if (payload.endDate && payload.endDate < payload.date) {
+					setStatus("La fecha fin no puede ser anterior a la fecha inicio.", "error");
 					return;
 				}
 
@@ -630,6 +640,7 @@
 					const payload = {
 						title: card.querySelector('input[name="title"]')?.value.trim(),
 						date: card.querySelector('input[name="date"]')?.value.trim(),
+						endDate: card.querySelector('input[name="endDate"]')?.value.trim() || "",
 						time: card.querySelector('input[name="time"]')?.value.trim(),
 						location: card.querySelector('input[name="location"]')?.value.trim(),
 						description: card.querySelector('textarea[name="description"]')?.value.trim(),
@@ -639,6 +650,11 @@
 
 					if (!payload.title || !payload.date) {
 						setStatus("Título y fecha son obligatorios para guardar.", "error");
+						return;
+					}
+
+					if (payload.endDate && payload.endDate < payload.date) {
+						setStatus("La fecha fin no puede ser anterior a la fecha inicio.", "error");
 						return;
 					}
 
@@ -682,6 +698,10 @@
 							<label class="field-group">
 								<span class="field-label">Fecha</span>
 								<input name="date" type="date" value="${escapeHtml(event.date ?? "")}" />
+							</label>
+							<label class="field-group">
+								<span class="field-label">Fecha fin</span>
+								<input name="endDate" type="date" value="${escapeHtml(event.endDate ?? "")}" />
 							</label>
 							<label class="field-group">
 								<span class="field-label">Hora</span>
@@ -894,9 +914,17 @@
 			return trimmed ? trimmed.slice(0, 5) : "";
 		};
 
+		const formatDateRangeLabel = (startValue, endValue) => {
+			const startLabel = formatDateLabel(startValue);
+			if (!startLabel) return "";
+			const endLabel = formatDateLabel(endValue);
+			if (!endLabel || endValue === startValue) return startLabel;
+			return `${startLabel} - ${endLabel}`;
+		};
+
 		const formatEventSubtitle = (event) => {
 			const parts = [];
-			const dateLabel = formatDateLabel(event.date);
+			const dateLabel = formatDateRangeLabel(event.date, event.endDate);
 			if (dateLabel) parts.push(dateLabel);
 			const timeLabel = formatTimeLabel(event.time);
 			if (timeLabel) parts.push(timeLabel);

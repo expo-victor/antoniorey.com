@@ -26,6 +26,10 @@ function sanitizeGallery(input: unknown): string[] {
 	return [];
 }
 
+function isValidRange(startDate: string, endDate: string): boolean {
+	return !endDate || endDate >= startDate;
+}
+
 function buildId(event: Pick<AgendaEvent, "date" | "title">): string {
 	const datePart = sanitizeString(event.date) || new Date().toISOString().split("T")[0];
 	const titlePart = sanitizeString(event.title)
@@ -66,6 +70,7 @@ export const POST: APIRoute = async ({ request }) => {
 
 	const title = sanitizeString(payload.title);
 	const date = sanitizeString(payload.date);
+	const endDate = sanitizeString(payload.endDate);
 
 	if (!title || !date) {
 		return new Response(
@@ -75,6 +80,13 @@ export const POST: APIRoute = async ({ request }) => {
 				headers: { "Content-Type": "application/json" },
 			},
 		);
+	}
+
+	if (!isValidRange(date, endDate)) {
+		return new Response(JSON.stringify({ error: "La fecha fin no puede ser anterior a la fecha inicio." }), {
+			status: 400,
+			headers: { "Content-Type": "application/json" },
+		});
 	}
 
 	const events = await readEvents();
@@ -91,6 +103,7 @@ const event: AgendaEvent = {
 	id,
 	title,
 	date,
+	endDate: endDate || undefined,
 	time: sanitizeString(payload.time) || undefined,
 	location: sanitizeString(payload.location) || undefined,
 	description: sanitizeString(payload.description) || undefined,

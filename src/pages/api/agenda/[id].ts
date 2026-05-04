@@ -24,6 +24,10 @@ function sanitizeGallery(input: unknown): string[] {
 	return [];
 }
 
+function isValidRange(startDate: string, endDate: string): boolean {
+	return !endDate || endDate >= startDate;
+}
+
 export const PUT: APIRoute = async ({ params, request }) => {
 	const isAuthorized = await authorize(request);
 	if (!isAuthorized) {
@@ -64,6 +68,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
 	const current = events[index];
 	const title = sanitize(payload.title);
 	const date = sanitize(payload.date);
+	const endDate = sanitize(payload.endDate);
 	const time = sanitize(payload.time);
 	const location = sanitize(payload.location);
 	const description = sanitize(payload.description);
@@ -78,11 +83,28 @@ export const PUT: APIRoute = async ({ params, request }) => {
 		});
 	}
 
+	if (!isValidRange(date, endDate)) {
+		return new Response(JSON.stringify({ error: "La fecha fin no puede ser anterior a la fecha inicio." }), {
+			status: 400,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
+
 	const updated: AgendaEvent = {
 		...current,
 		title,
 		date,
 	};
+
+	if (Object.prototype.hasOwnProperty.call(payload, "endDate")) {
+		if (endDate) {
+			updated.endDate = endDate;
+		} else {
+			delete updated.endDate;
+		}
+	} else if (current.endDate) {
+		updated.endDate = current.endDate;
+	}
 
 	if (Object.prototype.hasOwnProperty.call(payload, "time")) {
 		if (time) {

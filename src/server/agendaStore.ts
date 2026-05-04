@@ -7,6 +7,7 @@ export type AgendaEvent = {
 	id: string;
 	title: string;
 	date: string;
+	endDate?: string;
 	time?: string;
 	location?: string;
 	description?: string;
@@ -67,12 +68,12 @@ async function resolveWritePath(): Promise<string> {
 }
 
 function resolveEventTimestamp(event: AgendaEvent): number | null {
-	const rawDate = event.date?.trim();
+	const rawDate = (event.endDate?.trim() || event.date?.trim());
 	if (!rawDate) {
 		return null;
 	}
 
-	const rawTime = event.time?.trim();
+	const rawTime = event.endDate?.trim() ? "" : event.time?.trim();
 	const candidates: string[] = [];
 
 	if (rawTime) {
