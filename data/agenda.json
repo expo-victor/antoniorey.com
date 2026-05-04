@@ -1,3 +1,70 @@
 [
-
+  {
+    "id": "gira-latino-america-2027-04-07",
+    "title": "Gira Latinoamérica",
+    "date": "2027-04-07",
+    "endDate": "2027-04-25",
+    "location": "Latinoamérica",
+    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/LocationLatinAmerica.png"
+  },
+  {
+    "id": "festival-de-londres-2027-06-23",
+    "title": "Festival de Londres",
+    "date": "2027-06-23",
+    "endDate": "2027-06-25",
+    "location": "Londres, Reino Unido",
+    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/London%20Skyline%202021.jpg"
+  },
+  {
+    "id": "concierto-londres-2027-07-01",
+    "title": "Concierto Londres",
+    "date": "2027-07-01",
+    "location": "Londres, Reino Unido",
+    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/View%20of%20the%20City%20of%20London%20skyline.jpg"
+  },
+  {
+    "id": "gira-mexico-saltillo-monterrey-2027-07-02",
+    "title": "Gira México (Saltillo y Monterrey)",
+    "date": "2027-07-02",
+    "endDate": "2027-07-08",
+    "location": "Saltillo y Monterrey, México",
+    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Skyline%20de%20Monterrey.jpg"
+  },
+  {
+    "id": "concierto-cordoba-2027-07-10",
+    "title": "Concierto Córdoba",
+    "date": "2027-07-10",
+    "location": "Córdoba, España",
+    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Great%20Mezquita%20%28Mosque%29%20of%20C%C3%B3rdoba.jpg"
+  },
+  {
+    "id": "gira-mexico-cancun-merida-san-luis-de-potosi-2027-07-15",
+    "title": "Gira México (Cancún, Mérida y San Luis de Potosí)",
+    "date": "2027-07-15",
+    "endDate": "2027-07-20",
+    "location": "Cancún, Mérida y San Luis de Potosí, México",
+    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Cancun%20Beach.jpg"
+  },
+  {
+    "id": "concierto-alemania-2027-09-01",
+    "title": "Concierto Alemania",
+    "date": "2027-09-01",
+    "endDate": "2027-09-06",
+    "location": "Alemania",
+    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Berlin%20-%20Brandenburg%20Gate.jpg"
+  },
+  {
+    "id": "bienal-de-sevilla-2027-09-11",
+    "title": "Bienal de Sevilla",
+    "date": "2027-09-11",
+    "location": "Sevilla, España",
+    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/La%20Giralda%20-%20Seville%2C%20Spain.jpg"
+  },
+  {
+    "id": "teatro-calderon-2027-10-21",
+    "title": "Teatro Calderón",
+    "date": "2027-10-21",
+    "location": "Madrid, España",
+    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Teatro%20Calder%C3%B3n%20%28Madrid%29%2001.jpg"
+  }
 ]
